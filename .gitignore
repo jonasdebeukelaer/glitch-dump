@@ -1,0 +1,5 @@
+*.jpg
+*.png
+*.bmp
+pic_archive/
+.DS_Store
