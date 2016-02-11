@@ -1,4 +1,4 @@
-import pyfftw
+
 import math
 import numpy as np
 from scipy import signal
@@ -8,7 +8,9 @@ import random
 
 import filter1
 
-Im = Image.open("source/sky_silouhette.jpg")
+
+Im = Image.open("source/brain_sick.jpg")
+
 imageArray = np.array(Im)
 
 #------------------------------------------------------------------------------------
@@ -17,12 +19,15 @@ imageArray = np.array(Im)
 
 #imageArray = filter1.outlines(imageArray, 20, 8, False)
 
-#for i in [2, 4, 6, 8]:
-	#imageArray = filter1.outlines(imageArray, int(40/i), i, False)
-	#imageArray = filter1.outlines(imageArray, int(40/i), i, True)
+for i in [2]:
+	print "loop for %i" % i
+	imageArray = filter1.affectOnLineContrast(imageArray, contrast=100, span=(20/i), vertical=False, randomise=True, ifContrastLessThan=False)
+	#imageArray = filter1.affectOnLineContrast(imageArray, contrast=50, span=(20/i), vertical=False, randomise=True, ifContrastLessThan=False)
 
 
-imageArray = filter1.outlines(imageArray, 10, 20, True)
+
+#imageArray = filter1.outlines(imageArray, 10, 20, True)
+#imageArray = filter1.affectOnLineContrast(imageArray, contrast=20, span=4, vertical=True, randomise=True, ifContrastLessThan=False)
 #imageArray = filter1.mixup(imageArray)
 #imageArray = filter1.mixup(imageArray)
 #imageArray = filter1.mixup(imageArray)

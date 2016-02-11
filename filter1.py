@@ -20,11 +20,10 @@ def lowPass(img, cutoff):
 
   return img
 
-def outlines(img, contrast, span, vertical):
+def affectOnLineContrast(img, contrast=10, span=10, vertical=False, randomise=False, ifContrastLessThan=True):
   print "running outlines..."
   if vertical:
     img = np.swapaxes(img, 0, 1)
-
   newImg = img
   ymax = img.shape[0]
   xmax = img.shape[1]
@@ -40,13 +39,20 @@ def outlines(img, contrast, span, vertical):
         elif img[y, i, 0] < minVal:
           minVal = img[y, i, 0]
         avrg += img[y, i, 0]
+
       avrg /= (span * 2 + 1)
 
-      if (maxVal - minVal) < contrast:
-        red_avrg = int(1. * (int(img[y, x-1, 0]) + int(img[y, x-2, 0]) + int(img[y, x+1, 0]) + int(img[y, x+2, 0])) / 4)
-        green_avrg = int(1. * (int(img[y, x-1, 1]) + int(img[y, x-2, 1]) + int(img[y, x+1, 1]) + int(img[y, x+2, 1])) / 4)
-        blue_avrg = int(1. * (int(img[y, x-1, 2]) + int(img[y, x-2, 2]) + int(img[y, x+1, 2]) + int(img[y, x+2, 2])) / 4)
-        newImg[y][x-span:x+span][:] = [red_avrg, green_avrg, blue_avrg]
+      if ifContrastLessThan == ((maxVal - minVal) < contrast):
+        if randomise:
+          new_red = int(img[int(y - int(span / 2) + random.random() * span), x, 0] / min(0.003 * x, 20.))
+          new_green = int(img[int(y - int(span / 2) + random.random() * span), x, 1] / min(0.003* x, 20.))
+          new_blue = int(img[int(y - int(span / 2) + random.random() * span), x, 2] / min(0.003 * x, 20.))
+        else:
+          new_red = int(1. * (int(img[y, x-1, 0]) + int(img[y, x-2, 0]) + int(img[y, x+1, 0]) + int(img[y, x+2, 0])) / 4)
+          new_green = int(1. * (int(img[y, x-1, 1]) + int(img[y, x-2, 1]) + int(img[y, x+1, 1]) + int(img[y, x+2, 1])) / 4)
+          new_blue = int(1. * (int(img[y, x-1, 2]) + int(img[y, x-2, 2]) + int(img[y, x+1, 2]) + int(img[y, x+2, 2])) / 4)
+          
+        newImg[y][x- span:min(x+300, xmax)][:] = [new_red, new_green, new_blue]
 
   if vertical:
     newImg = np.swapaxes(newImg, 0, 1)
