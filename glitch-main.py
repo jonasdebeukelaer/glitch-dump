@@ -8,7 +8,7 @@ import random
 
 import filter1
 
-Im = Image.open("rihanna.bmp")
+Im = Image.open("source/sky_silouhette.jpg")
 imageArray = np.array(Im)
 
 #------------------------------------------------------------------------------------
@@ -22,9 +22,9 @@ imageArray = np.array(Im)
 	#imageArray = filter1.outlines(imageArray, int(40/i), i, True)
 
 
-imageArray = filter1.outlines(imageArray, 10, 8, False)
+imageArray = filter1.outlines(imageArray, 10, 20, True)
 #imageArray = filter1.mixup(imageArray)
-imageArray = filter1.mixup(imageArray)
+#imageArray = filter1.mixup(imageArray)
 #imageArray = filter1.mixup(imageArray)
 
 #imageArray = filter1.offset(imageArray, 10)

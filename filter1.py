@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import tools
 
 def highPass(img, cutoff):
   print "running highpass..."
@@ -28,6 +29,7 @@ def outlines(img, contrast, span, vertical):
   ymax = img.shape[0]
   xmax = img.shape[1]
   for y in range(0, ymax):
+    tools.displayPercentage(y, ymax)
     for x in range(span, xmax-span):
       maxVal = 0
       minVal = 255
