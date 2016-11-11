@@ -1,6 +1,17 @@
 import sys, time
+from PIL import Image
 
-def displayPercentage(i, total):
+#wrap pixels around edges of the 
+def wrap(maxPosition, position):
+  if position > maxPosition:
+    return position - maxPosition
+  elif position < 0:
+    return maxPosition - position
+  else:
+    return position
+
+
+def displayPercentage( msg, i, total):
   progress = i / (1. * total)
   barLength = 20 # Modify this to change the length of the progress bar
   status = ""
@@ -16,6 +27,19 @@ def displayPercentage(i, total):
     progress = 1
     status = "Done...\r\n"
   block = int(round(barLength*progress))
-  text = "\r[{0}] {1}% {2}".format( "="*block + " "*(barLength-block), int(progress*100), status)
+  text = msg + "\r[{0}] {1}% {2}".format( "="*block + " "*(barLength-block), int(progress*100), status)
   sys.stdout.write(text)
   sys.stdout.flush()
+
+
+
+def saveNewFile(imageArray, fileName, isForGif=False):
+  print ""
+  print "renormalise and save..."
+  imageArray = 255. * imageArray / imageArray.max()
+
+  if not isForGif:
+    fileName = "%s_%s" % (fileName, time.strftime("%y-%m-%d, %H:%M:%S"))
+
+  smooshFaceImage = Image.fromarray(imageArray.astype('uint8'))
+  smooshFaceImage.save("pic_archive/%s.bmp" % (fileName))
