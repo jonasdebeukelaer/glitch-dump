@@ -7,10 +7,11 @@ import tools
 import filter1
 import filterFourier
 import filterLines
+import filterWave
 
 
-fileName = 'circular'
-Im = Image.open("source/%s.jpg" % (fileName))
+fileName = 'plane.jpg'
+Im = Image.open("source/%s" % (fileName))
 imageArray = np.array(Im)
 
 #------------------------------------------------------------------------------------
@@ -24,18 +25,9 @@ imageArray = np.array(Im)
 
 # 	tools.saveNewFile(imageArray, "frame_%03d" % (i//2), True)
 # 	tools.saveNewFile(imageArray, "frame_%03d" % ((199-i)//2), True)
-#imageArray = filter1.affectOnLineContrast(imageArray, contrast=100, span=3, vertical=False, randomise=True, ifContrastLessThan=False)
-#imageArray = filter1.affectOnLineContrast(imageArray, contrast=100, span=2, vertical=True, randomise=True, ifContrastLessThan=False)
-#imageArray = np.transpose(imageArray[::-1], (1, 0, 2))
-#imageArray = filter1.affectOnLineContrast(imageArray, contrast=100, span=3, vertical=False, randomise=True, ifContrastLessThan=False)
-#imageArray = filter1.affectOnLineContrast(imageArray, contrast=100, span=2, vertical=True, randomise=True, ifContrastLessThan=False)
-#imageArray = np.transpose(imageArray, (1, 0, 2))[::-1]
-
-#imageArray = filter1.increaseContrast(imageArray)
-#imageArray = filter1.increaseContrast(imageArray)
 
 
-for i in range(0, 20):
+for i in range(0, 1):
 	print "creating img %i" % i
 
 	rContrastFactor = 1 + random.random() + 1
@@ -44,7 +36,7 @@ for i in range(0, 20):
 	rLean = int(random.random()**2 * 4) * (-1)**(int(random.random()*2))
 	rSeparateColours = random.random() > 0.7
 	rAllowLineMerging = random.random() > 0.8
-	print "params: lineFactor %i, lean %i, separateColours %r" % (rLineFactor, rLean, rSeparateColours)
+	#print "params: lineFactor %i, lean %i, separateColours %r" % (rLineFactor, rLean, rSeparateColours)
 
 	rContrast = int(random.random() * 200)
 	rSpan = int(random.random() * 5)
@@ -52,11 +44,11 @@ for i in range(0, 20):
 	rRandomise = random.random() > 0.8
 	rIfContrastLessThan = random.random() > 0.7
 
-	newImageArray = filter1.increaseContrast(imageArray, factor=rContrastFactor)
-	newImageArray = filterLines.linify(newImageArray, separateColours=rSeparateColours, lineFactor=rLineFactor, lean=rLean, allowLineMerging=rAllowLineMerging)
-	newImageArray = filter1.affectOnLineContrast(newImageArray, contrast=rContrast, span=rSpan, vertical=rVertical, randomise=rRandomise, ifContrastLessThan=rIfContrastLessThan)
+	imageArray = filterFourier.blur2D(imageArray, gaussianAccent=0.5)
+	imageArray = filterWave.wavify(imageArray, lineCount=100, overlap=2.)
+	#imageArray = imageArray.antialiase(imageArray)
 
-	tools.saveNewFile(newImageArray, fileName)
+	tools.saveNewFile(imageArray, fileName)
 
 
 	#TODO MAKE PARAMS CHANGE AS USER GIVES POSITIVE/NEGATIVE FEEDBACK ~~MACHINE LEARNING~~

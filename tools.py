@@ -6,7 +6,7 @@ def wrap(maxPosition, position):
   if position > maxPosition:
     return position - maxPosition
   elif position < 0:
-    return maxPosition - position
+    return maxPosition + position
   else:
     return position
 
@@ -37,6 +37,7 @@ def saveNewFile(imageArray, fileName, isForGif=False):
   print ""
   print "renormalise and save..."
   imageArray = 255. * imageArray / imageArray.max()
+
 
   if not isForGif:
     fileName = "%s_%s" % (fileName, time.strftime("%y-%m-%d, %H:%M:%S"))
