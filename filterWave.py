@@ -1,8 +1,10 @@
 import numpy as np
-from tools import wrap
+from tools import wrap, monocrome
 
 def wavify(img, lineCount, overlap=0):
 	sparseness = img.shape[0] / lineCount
+	
+	img = monocrome(img)
 
 	if len(img.shape) == 3:
 		img = np.sum(img, axis=2).astype(np.float)
@@ -37,4 +39,4 @@ def sparsify(x, sparseness, index, blankHLine):
 		return blankHLine
 
 def verticalise(sparseness, brightness, overlap):
-	return -int(brightness * sparseness * (1+overlap))
+	return -int((brightness-0.5) * sparseness * (1+overlap))

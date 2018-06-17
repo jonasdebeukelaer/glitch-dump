@@ -91,13 +91,8 @@ def increaseContrast(img, factor=2):
   xmax = img.shape[1]
   newImg = img
   print ""
-  for y in range(0, ymax):
-    tools.displayPercentage("running increase contrast... ", y, ymax)
-    for x in range(0, xmax):
-      newImg[y, x, 0] = int(img[y, x, 0]**(factor))
-      newImg[y, x, 1] = int(img[y, x, 1]**(factor))
-      newImg[y, x, 2] = int(img[y, x, 2]**(factor))
-
+  newImg = img**factor
+  
   return newImg
 
 

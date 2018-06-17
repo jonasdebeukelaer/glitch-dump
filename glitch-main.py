@@ -8,9 +8,10 @@ import filter1
 import filterFourier
 import filterLines
 import filterWave
+import filterPostProcessing
 
 
-fileName = 'plane.jpg'
+fileName = 'portait_1.jpg'
 Im = Image.open("source/%s" % (fileName))
 imageArray = np.array(Im)
 
@@ -44,9 +45,10 @@ for i in range(0, 1):
 	rRandomise = random.random() > 0.8
 	rIfContrastLessThan = random.random() > 0.7
 
-	imageArray = filterFourier.blur2D(imageArray, gaussianAccent=0.5)
-	imageArray = filterWave.wavify(imageArray, lineCount=100, overlap=2.)
-	#imageArray = imageArray.antialiase(imageArray)
+	imageArray = filterFourier.blur2D(imageArray, gaussianAccent=180)
+	imageArray = filterWave.wavify(imageArray, lineCount=100, overlap=1.8)
+	#imageArray = filterPostProcessing.antialiase(imageArray)
+	imageArray = filterFourier.blur2D(imageArray, gaussianAccent=400, process="antialiase")
 
 	tools.saveNewFile(imageArray, fileName)
 
