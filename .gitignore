@@ -3,3 +3,4 @@
 *.bmp
 pic_archive/
 .DS_Store
+*.pyc
