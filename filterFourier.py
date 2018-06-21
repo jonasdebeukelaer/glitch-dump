@@ -23,7 +23,17 @@ def fourierEffect(img, steps):
     return newImg
 
 def blur2D(img, gaussianAccent=0.4, process="gaussian"):
+    if len(img.shape) == 2: 
+        return blur2DMonocrome(img, lineCount, sparseness, overlap)
+    else:
+        img0 = blur2DMonocrome(img[:, :, 0], gaussianAccent, process)
+        img1 = blur2DMonocrome(img[:, :, 1], gaussianAccent, process)
+        img2 = blur2DMonocrome(img[:, :, 2], gaussianAccent, process)
+        img = np.dstack([img0, img1, img2])
+        return img
 
+def blur2DMonocrome(img, gaussianAccent, process):
+    print ""
     img = tools.monocrome(img)
     fImg = np.fft.rfft2(img, axes=(0,1))
 
@@ -41,7 +51,7 @@ def createKernel(imgShape, gaussianAccent, process):
     kernel = np.zeros((imgShape))
 
     for xIndex, x in enumerate(kernel):
-        tools.displayPercentage("running %s blur... " % (process), xIndex, x_*2)
+        tools.displayPercentage("running %s blur... " % (process), xIndex, imgShape[0])
         for yIndex, y in enumerate(x):
 
             kernel[xIndex, yIndex] = gaussian2D(xIndex, yIndex, x_, y_, gaussianAccent)

@@ -11,7 +11,7 @@ import filterWave
 import filterPostProcessing
 
 
-fileName = 'portait_1.jpg'
+fileName = 'body.jpg'
 Im = Image.open("source/%s" % (fileName))
 imageArray = np.array(Im)
 
@@ -26,6 +26,10 @@ imageArray = np.array(Im)
 
 # 	tools.saveNewFile(imageArray, "frame_%03d" % (i//2), True)
 # 	tools.saveNewFile(imageArray, "frame_%03d" % ((199-i)//2), True)
+
+colourMapping = {0:[186,0,0],
+				 1:[240,227,227],
+				 2:[37,163,70]}
 
 
 for i in range(0, 1):
@@ -45,10 +49,15 @@ for i in range(0, 1):
 	rRandomise = random.random() > 0.8
 	rIfContrastLessThan = random.random() > 0.7
 
-	imageArray = filterFourier.blur2D(imageArray, gaussianAccent=180)
-	imageArray = filterWave.wavify(imageArray, lineCount=100, overlap=1.8)
-	#imageArray = filterPostProcessing.antialiase(imageArray)
-	imageArray = filterFourier.blur2D(imageArray, gaussianAccent=400, process="antialiase")
+	imageArray = filterFourier.blur2D(imageArray, gaussianAccent=280)
+	imageArray = filterWave.wavify(imageArray, lineCount=70, overlap=2.)
+	imageArray = filter1.spreadPrimaryColours(imageArray, colourMapping)
+
+	#imageArray = filter1.affectOnLineContrast(imageArray, vertical=False, ifContrastLessThan=False)
+	#imageArray = filter1.mixup(imageArray)
+	imageArray = filterFourier.blur2D(imageArray, gaussianAccent=600, process="antialiase")
+
+
 
 	tools.saveNewFile(imageArray, fileName)
 

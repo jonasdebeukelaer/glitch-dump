@@ -1,5 +1,15 @@
 import sys, time
+import numpy as np
+
 from PIL import Image
+
+#convert to black & white if it's not already
+def monocrome(img):
+  if len(img.shape) == 3:
+    img = np.sum(img, axis=2).astype(np.float)
+  else:
+    img = img.astype(np.float)
+  return img * 255. / np.max(img)
 
 #wrap pixels around edges of the 
 def wrap(maxPosition, position):
@@ -43,4 +53,4 @@ def saveNewFile(imageArray, fileName, isForGif=False):
     fileName = "%s_%s" % (fileName, time.strftime("%y-%m-%d, %H:%M:%S"))
 
   smooshFaceImage = Image.fromarray(imageArray.astype('uint8'))
-  smooshFaceImage.save("pic_archive/%s.bmp" % (fileName))
+  smooshFaceImage.save("pic_archive/%s.jpg" % (fileName))

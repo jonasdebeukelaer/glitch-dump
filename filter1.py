@@ -71,13 +71,12 @@ def offset(img, offset):
 
 def mixup(img):
   weight = 0.4
-  cutoff = 200
-  print "running mixup..."
+  cutoff = 100
   ymax = img.shape[0]
   xmax = img.shape[1]
   newImg = img
   for y in range(0, ymax):
-    tools.displayPercentage("running mix up... ", y, ymax)
+    tools.displayPercentage("running mixup... ", y, ymax)
     for x in range(0, xmax):
       if img[y, x, 2] < cutoff and img[y, x, 1] < cutoff:
         newx = ((x + img[y, x, 2]) * 2) % xmax
@@ -91,8 +90,25 @@ def increaseContrast(img, factor=2):
   xmax = img.shape[1]
   newImg = img
   print ""
-  newImg = img**factor
+  newImg = (img - np.mean(img))**factor
   
   return newImg
 
+def spreadPrimaryColours(img, mapping):
+  print ""
+  for x in range(0, 3): 
+    mapping[x] = np.array(mapping[x]) * 1. / np.sum(mapping[x])
+
+  for i, row in enumerate(img):
+    tools.displayPercentage("running spreadPrimaryColours... ", i, img.shape[0])
+
+    for j, element in enumerate(row):
+      spread0 = element[0] * np.array(mapping[0])
+      spread1 = element[1] * np.array(mapping[1])
+      spread2 = element[2] * np.array(mapping[2])
+      newElemet = spread0 + spread1 + spread2
+
+      img[i, j] = newElemet.astype(np.int)
+
+  return np.array(img) * 255. / np.sum(img)
 
