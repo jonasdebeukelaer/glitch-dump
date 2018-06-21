@@ -10,6 +10,8 @@ import filterFourier
 import filterLines
 import filterBlur
 import filterCutoff
+import filterWave
+import filterPostProcessing
 
 
 fileName = 'ink'
@@ -65,14 +67,33 @@ def imgToGifGlitch(img, rangeMax):
 
 
 def imgToimg(imageArray):
-	#imageArray = filterLines.linify(imageArray, separateColours=False, lineFactor=2, lean=0, allowLineMerging=False)
-	#imageArray = filter1.affectOnLineContrast(imageArray, contrast=50, span=5, vertical=True, randomise=False, ifContrastLessThan=True)
-	#imageArray = filterBlur.selectiveBlur(imageArray, splits=2, cutoff=235, sigma=10)
-    imageArray = filterLines.linify(imageArray, separateColours=False, lineFactor=5, lean=0, allowLineMerging=False, straightOnly=False)
-    tools.saveNewFile(imageArray, fileName)
+    for i in range(0, 1):
+		print "creating img %i" % i
+
+		rContrastFactor = 1 + random.random() + 1
+
+		rLineFactor = int(random.random() * 16 + 0.5)
+		rLean = int(random.random()**2 * 4) * (-1)**(int(random.random()*2))
+		rSeparateColours = random.random() > 0.7
+		rAllowLineMerging = random.random() > 0.8
+		#print "params: lineFactor %i, lean %i, separateColours %r" % (rLineFactor, rLean, rSeparateColours)
+
+		rContrast = int(random.random() * 200)
+		rSpan = int(random.random() * 5)
+		rVertical = random.random() > 0.3
+		rRandomise = random.random() > 0.8
+		rIfContrastLessThan = random.random() > 0.7
+
+		imageArray = filterFourier.blur2D(imageArray, gaussianAccent=180)
+		imageArray = filterWave.wavify(imageArray, lineCount=100, overlap=1.8)
+		#imageArray = filterPostProcessing.antialiase(imageArray)
+		imageArray = filterFourier.blur2D(imageArray, gaussianAccent=400, process="antialiase")
+
+		tools.saveNewFile(imageArray, fileName)
 
 imgToimg(imageArray)
 
 
 #TODO MAKE PARAMS CHANGE AS USER GIVES POSITIVE/NEGATIVE FEEDBACK ~~MACHINE LEARNING~~
+
 
