@@ -2,61 +2,77 @@
 import numpy as np
 import random
 from PIL import Image
+import sys
 
 import tools
 import filter1
 import filterFourier
 import filterLines
+import filterBlur
+import filterCutoff
 
 
-fileName = 'circular'
+fileName = 'ink'
+
 Im = Image.open("source/%s.jpg" % (fileName))
 imageArray = np.array(Im)
 
-#------------------------------------------------------------------------------------
+def gifGlitch(infile):
+    try:
+        im = Image.open(infile)
+    except IOError:
+        print "Can't load gif", infile
+        sys.exit(1)
+    i = 0
+    mypalette = im.getpalette()
+    gifImgs = []
+    try:
+        while i+1:
+            im.putpalette(mypalette)
+            new_im = Image.new("RGBA", im.size)
+            new_im.paste(im)
+            imArray = np.array(new_im)
+            imArray = imArray[:, :, :-1]
+            #imArray = filter1.increaseContrast(imArray, factor=1.8)
+            imArray = filterLines.linify(imArray, separateColours=False, lineFactor=4, lean=1, allowLineMerging=True)
+            imArray = filter1.affectOnLineContrast(imArray, contrast=150, span=8, vertical=True, randomise=True, ifContrastLessThan=False)
+            gifImgs.append(imArray)
+            i += 1
+            im.seek(im.tell() + 1)
 
-#imageArray = filter1.highPass(imageArray, 100)
-#imageArray = filter1.mixup(imageArray)
-# for i in range(0, 100):
-# 	imageArray = filterFourier.fourierEffect(imageArray, [int(200/(i+1)*2), int(300/(i+1)*2), int(400/(i+1)*2)])
-# 	imageArray = filterFourier.fourierEffect(np.transpose(imageArray, (1,0,2)), [int(200/(i+1)*2), int(300/(i+1)*2), int(400/(i+1)*2)])
-# 	imageArray = np.transpose(imageArray, (1,0,2))
+    except EOFError:
+        pass # end of sequence
+    tools.saveNewGif(gifImgs, fileName)
 
-# 	tools.saveNewFile(imageArray, "frame_%03d" % (i//2), True)
-# 	tools.saveNewFile(imageArray, "frame_%03d" % ((199-i)//2), True)
-#imageArray = filter1.affectOnLineContrast(imageArray, contrast=100, span=3, vertical=False, randomise=True, ifContrastLessThan=False)
-#imageArray = filter1.affectOnLineContrast(imageArray, contrast=100, span=2, vertical=True, randomise=True, ifContrastLessThan=False)
-#imageArray = np.transpose(imageArray[::-1], (1, 0, 2))
-#imageArray = filter1.affectOnLineContrast(imageArray, contrast=100, span=3, vertical=False, randomise=True, ifContrastLessThan=False)
-#imageArray = filter1.affectOnLineContrast(imageArray, contrast=100, span=2, vertical=True, randomise=True, ifContrastLessThan=False)
-#imageArray = np.transpose(imageArray, (1, 0, 2))[::-1]
+def imgToGifGlitch(img, rangeMax):
+	imgList = []
+	for i in range(0, rangeMax):
+		print""
+		print "creating img %i" % i
 
-#imageArray = filter1.increaseContrast(imageArray)
-#imageArray = filter1.increaseContrast(imageArray)
+		vCutoff = int(255 - abs(255 - ((1.0*i/rangeMax)*510)))
+		vSigma = max(0.01, 10 - abs(10 - (1.0*20*i/rangeMax)))
+		
+		print "params: vCutoff %i, vSigma %i" % (vCutoff, vSigma)
 
+		newImageArray = filterBlur.selectiveBlur(imageArray, splits=2, cutoff=vCutoff, sigma=vSigma)
+		imgList.append(int(newImageArray+0.5))
 
-for i in range(0, 20):
-	print "creating img %i" % i
+	tools.saveNewGif(imgList, fileName)
 
-	rContrastFactor = 1 + random.random() + 1
-
-	rLineFactor = int(random.random() * 16 + 0.5)
-	rLean = int(random.random()**2 * 4) * (-1)**(int(random.random()*2))
-	rSeparateColours = random.random() > 0.7
-	rAllowLineMerging = random.random() > 0.8
-	print "params: lineFactor %i, lean %i, separateColours %r" % (rLineFactor, rLean, rSeparateColours)
-
-	rContrast = int(random.random() * 200)
-	rSpan = int(random.random() * 5)
-	rVertical = random.random() > 0.3
-	rRandomise = random.random() > 0.8
-	rIfContrastLessThan = random.random() > 0.7
-
-	newImageArray = filter1.increaseContrast(imageArray, factor=rContrastFactor)
-	newImageArray = filterLines.linify(newImageArray, separateColours=rSeparateColours, lineFactor=rLineFactor, lean=rLean, allowLineMerging=rAllowLineMerging)
-	newImageArray = filter1.affectOnLineContrast(newImageArray, contrast=rContrast, span=rSpan, vertical=rVertical, randomise=rRandomise, ifContrastLessThan=rIfContrastLessThan)
-
-	tools.saveNewFile(newImageArray, fileName)
+#gifGlitch("source/%s.gif" % (fileName))
+#imgToGifGlitch(imageArray, 60)
 
 
-	#TODO MAKE PARAMS CHANGE AS USER GIVES POSITIVE/NEGATIVE FEEDBACK ~~MACHINE LEARNING~~
+def imgToimg(imageArray):
+	#imageArray = filterLines.linify(imageArray, separateColours=False, lineFactor=2, lean=0, allowLineMerging=False)
+	#imageArray = filter1.affectOnLineContrast(imageArray, contrast=50, span=5, vertical=True, randomise=False, ifContrastLessThan=True)
+	#imageArray = filterBlur.selectiveBlur(imageArray, splits=2, cutoff=235, sigma=10)
+    imageArray = filterLines.linify(imageArray, separateColours=False, lineFactor=5, lean=0, allowLineMerging=False, straightOnly=False)
+    tools.saveNewFile(imageArray, fileName)
+
+imgToimg(imageArray)
+
+
+#TODO MAKE PARAMS CHANGE AS USER GIVES POSITIVE/NEGATIVE FEEDBACK ~~MACHINE LEARNING~~
+

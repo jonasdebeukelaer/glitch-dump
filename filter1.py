@@ -4,24 +4,6 @@ import tools
 from tools import wrap
 import math
 
-def highPass(img, cutoff):
-  print "running highpass..."
-  for i in range(0, img.shape[0]):
-    for j in range(0, img.shape[1]):
-      if img[i, j, 0] < cutoff:
-        img[i, j][:] = 0
-
-  return img
-
-def lowPass(img, cutoff):
-  print "running lowpass..."
-  for i in range(0, img.shape[0]):
-    for j in range(0, img.shape[1]):
-      if img[i, j, 0] > cutoff:
-        img[i, j][:] = 255
-
-  return img
-
 def affectOnLineContrast(img, contrast=10, span=10, vertical=False, randomise=False, ifContrastLessThan=True):
   if vertical:
     img = np.swapaxes(img, 0, 1)
@@ -56,7 +38,10 @@ def affectOnLineContrast(img, contrast=10, span=10, vertical=False, randomise=Fa
           new_blue = int(1. * (int(img[wrap(ymax, y), wrap(xmax, x-1), 2]) + int(img[wrap(ymax, y), wrap(xmax-1, x-2), 2]) + int(img[wrap(ymax, y), wrap(xmax, x+1), 2]) + int(img[wrap(ymax, y), wrap(xmax, x+2), 2])) / 4)
           
         if new_red > 10 or new_green > 10 or new_blue > 10:
-          newImg[y][max(x-span, 0):min(x+span, xmax)][:] = [new_red, new_green, new_blue]
+          if img.shape[2] == 4:
+            newImg[y][max(x-span, 0):min(x+span, xmax)][:] = [new_red, new_green, new_blue, 255]
+          else:
+            newImg[y][max(x-span, 0):min(x+span, xmax)][:] = [new_red, new_green, new_blue]
 
   if vertical:
     newImg = np.swapaxes(newImg, 0, 1)

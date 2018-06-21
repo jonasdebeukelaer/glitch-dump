@@ -1,12 +1,13 @@
 import sys, time
 from PIL import Image
+import imageio
 
 #wrap pixels around edges of the 
 def wrap(maxPosition, position):
   if position > maxPosition:
     return position - maxPosition
   elif position < 0:
-    return maxPosition - position
+    return maxPosition + position
   else:
     return position
 
@@ -32,14 +33,20 @@ def displayPercentage( msg, i, total):
   sys.stdout.flush()
 
 
+def saveNewGif(gifImgs, fileName):
+  print ""
+  print "renormalise and save..."
+  fileName = "%s_%s" % (fileName, time.strftime("%y-%m-%d %H_%M_%S"))
+  gifImgs = [255. * imageArray / imageArray.max() for imageArray in gifImgs]
 
-def saveNewFile(imageArray, fileName, isForGif=False):
+  imageio.mimsave("pic_archive/%s.gif" % (fileName), gifImgs, fps=24)
+
+def saveNewFile(imageArray, fileName):
   print ""
   print "renormalise and save..."
   imageArray = 255. * imageArray / imageArray.max()
 
-  if not isForGif:
-    fileName = "%s_%s" % (fileName, time.strftime("%y-%m-%d, %H:%M:%S"))
+  fileName = "%s_%s" % (fileName, time.strftime("%y-%m-%d %H_%M_%S"))
 
   smooshFaceImage = Image.fromarray(imageArray.astype('uint8'))
-  smooshFaceImage.save("pic_archive/%s.bmp" % (fileName))
+  smooshFaceImage.save("pic_archive/%s.png" % (fileName))
