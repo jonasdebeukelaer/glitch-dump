@@ -1,20 +1,24 @@
 import numpy as np
+from math import sin, pi
 from tools import wrap, monocrome, displayPercentage
 
-def wavify(img, lineCount, overlap=0):
+def wavifyConstantWave(img, lineCount, overlap=0, constantWaveCount=10):
+	return wavify(img, lineCount, overlap=0, constantWave=True, constantWaveCount=constantWaveCount)
+
+def wavify(img, lineCount, overlap=0, constantWave=False, constantWaveCount=0):
 	print ""
 	sparseness = img.shape[0] / lineCount
 	
 	if len(img.shape) == 2:	
 		return wavifyMonocrome(img, lineCount, sparseness, overlap)
 	else:
-		img0 = wavifyMonocrome(img[:, :, 0], lineCount, sparseness, overlap, offset=0)
-		img1 = wavifyMonocrome(img[:, :, 1], lineCount, sparseness, overlap, offset=0)
-		img2 = wavifyMonocrome(img[:, :, 2], lineCount, sparseness, overlap, offset=0)
+		img0 = wavifyMonocrome(img[:, :, 0], lineCount, sparseness, overlap, 0, constantWave, constantWaveCount)
+		img1 = wavifyMonocrome(img[:, :, 1], lineCount, sparseness, overlap, 0, constantWave, constantWaveCount)
+		img2 = wavifyMonocrome(img[:, :, 2], lineCount, sparseness, overlap, 0, constantWave, constantWaveCount)
 		img = np.dstack([img0, img1, img2])
 		return img
 
-def wavifyMonocrome(img, lineCount, sparseness, overlap, offset):
+def wavifyMonocrome(img, lineCount, sparseness, overlap, offset, constantWave, constantWaveCount):
 	print ""
 	img = img.astype(np.float)
 
@@ -33,7 +37,13 @@ def wavifyMonocrome(img, lineCount, sparseness, overlap, offset):
 		if (i - offset) % sparseness != 0: continue
 
 		for j, element in enumerate(row):
-			newYIndex = wrap( maxIndex[0], (i + verticalise(sparseness, element, overlap)))
+			newYIndex = None
+			if not constantWave:
+				newYIndex = wrap( maxIndex[0], (i + verticalise(sparseness, element, overlap)))	
+			else:
+				wavelength = int(1. * maxIndex[1] / constantWaveCount)
+				newYIndex = wrap( maxIndex[0], (i + sinVerticalise(sparseness, element, overlap, j, wavelength)))
+			
 			wavyImg[newYIndex, j] = 255
 
 	return wavyImg
@@ -46,3 +56,7 @@ def sparsify(x, sparseness, index, blankHLine, offset):
 
 def verticalise(sparseness, brightness, overlap):
 	return -int((brightness-0.5) * sparseness * (1+overlap))
+
+def sinVerticalise(sparseness, brightness, overlap, j, wavelength):
+	vanillaSineWave = sin(2. * pi * j / wavelength)
+	return -int((brightness-0.5) * sparseness * (1+overlap)) * vanillaSineWave

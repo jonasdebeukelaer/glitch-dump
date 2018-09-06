@@ -13,7 +13,7 @@ import filterCutoff
 import filterWave
 import filterPostProcessing
 
-fileName = 'body.jpg'
+fileName = 'sunset_colombia.jpg'
 Im = Image.open("source/%s" % (fileName))
 imageArray = np.array(Im)
 
@@ -69,7 +69,7 @@ def imgToimg(imageArray):
 				 1:[240,227,227],
 				 2:[37,163,70]}
 
-    for i in range(0, 1):
+	for i in range(0, 1):
 		print "creating img %i" % i
 
 		rContrastFactor = 1 + random.random() + 1	
@@ -84,14 +84,14 @@ def imgToimg(imageArray):
 		rRandomise = random.random() > 0.8
 		rIfContrastLessThan = random.random() > 0.7
 
-		imageArray = filterFourier.blur2D(imageArray, gaussianAccent=180)
-		imageArray = filterWave.wavify(imageArray, lineCount=100, overlap=1.8)
+		#imageArray = filterFourier.blur2D(imageArray, gaussianAccent=180)
+		imageArray = filterWave.wavifyConstantWave(imageArray, lineCount=100, overlap=2.8, constantWaveCount=16)
 		#imageArray = filterPostProcessing.antialiase(imageArray)
-		imageArray = filterFourier.blur2D(imageArray, gaussianAccent=400, process="antialiase")
+		#imageArray = filterFourier.blur2D(imageArray, gaussianAccent=400, process="antialiase")
 
-		imageArray = filterFourier.blur2D(imageArray, gaussianAccent=280)
-		imageArray = filterWave.wavify(imageArray, lineCount=70, overlap=2.)
-		imageArray = filter1.spreadPrimaryColours(imageArray, colourMapping)
+		#imageArray = filterFourier.blur2D(imageArray, gaussianAccent=280)
+		#imageArray = filterWave.wavify(imageArray, lineCount=70, overlap=2.)
+		#imageArray = filter1.spreadPrimaryColours(imageArray, colourMapping)
 
 		#imageArray = filter1.affectOnLineContrast(imageArray, vertical=False, ifContrastLessThan=False)
 		#imageArray = filter1.mixup(imageArray)

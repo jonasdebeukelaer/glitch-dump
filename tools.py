@@ -12,7 +12,7 @@ def monocrome(img):
     img = img.astype(np.float)
   return img * 255. / np.max(img)
 
-#wrap pixels around edges of the 
+#wrap pixels around edges of the image
 def wrap(maxPosition, position):
   if position > maxPosition:
     return position - maxPosition
@@ -56,8 +56,7 @@ def saveNewFile(imageArray, fileName):
   print "renormalise and save..."
   imageArray = 255. * imageArray / imageArray.max()
 
-  if not isForGif:
-    fileName = "%s_%s" % (fileName, time.strftime("%y-%m-%d, %H:%M:%S"))
+  fileName = "%s_%s" % (fileName, time.strftime("%y-%m-%d, %H:%M:%S"))
 
   smooshFaceImage = Image.fromarray(imageArray.astype('uint8'))
   smooshFaceImage.save("pic_archive/%s.png" % (fileName))
