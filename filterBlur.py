@@ -1,75 +1,59 @@
 import math
-import tools
 import numpy as np
 
-from filterCutoff import midPass
+from filterCutoff import mid_pass
 import filterLines
 import filter1
 
-def gaussianBlur(img, sigma=5):
-    print ""
-    print "Running Gaussian blur..."
-    fImgRed = np.fft.rfft2(img[:,:,0], axes=(0,1))
-    fImgBlue = np.fft.rfft2(img[:,:,1], axes=(0,1))
-    fImgGreen = np.fft.rfft2(img[:,:,2], axes=(0,1))
-    
-    gShape = img.shape
-    muX = int((gShape[0]) / 2)
-    muY = int((gShape[1]) / 2)
 
-    gaussian = [[(1.0/(2*math.pi*sigma**2))*math.exp((-1.0)*((i-muY)**2+(j-muX)**2)/(2*sigma**2)) for i in range(gShape[1])] for j in range(gShape[0])]
+def gaussian_blur(img, sigma=5):
+    print("")
+    print("Running Gaussian blur...")
+    f_img_red = np.fft.rfft2(img[:, :, 0], axes=(0, 1))
+    f_img_blue = np.fft.rfft2(img[:, :, 1], axes=(0, 1))
+    f_img_green = np.fft.rfft2(img[:, :, 2], axes=(0, 1))
+
+    g_shape = img.shape
+    mu_x = int((g_shape[0]) / 2)
+    mu_y = int((g_shape[1]) / 2)
+
+    gaussian = [
+        [(1.0 / (2 * math.pi * sigma ** 2)) * math.exp((-1.0) * ((i - mu_y) ** 2 + (j - mu_x) ** 2) / (2 * sigma ** 2))
+         for i in range(g_shape[1])] for j in range(g_shape[0])]
     gaussian = np.array(gaussian)
-    fGaussian = np.fft.rfft2(gaussian, axes=(0,1))
+    f_gaussian = np.fft.rfft2(gaussian, axes=(0, 1))
 
-    blurredImg = np.zeros(img.shape)
-    blurredImg[:, :, 0] = np.fft.irfft2(fImgRed * fGaussian)
-    blurredImg[:, :, 1] = np.fft.irfft2(fImgBlue * fGaussian)
-    blurredImg[:, :, 2] = np.fft.irfft2(fImgGreen * fGaussian)
-    blurredImg = np.fft.fftshift(blurredImg, axes=(0,1))
+    blurred_img = np.zeros(img.shape)
+    blurred_img[:, :, 0] = np.fft.irfft2(f_img_red * f_gaussian)
+    blurred_img[:, :, 1] = np.fft.irfft2(f_img_blue * f_gaussian)
+    blurred_img[:, :, 2] = np.fft.irfft2(f_img_green * f_gaussian)
+    blurred_img = np.fft.fftshift(blurred_img, axes=(0, 1))
 
     gaussian3 = np.zeros(img.shape)
     gaussian3[:, :, 0] = gaussian
     gaussian3[:, :, 1] = gaussian
     gaussian3[:, :, 2] = gaussian
 
-    blurredImg = 255.0 * blurredImg / blurredImg.max()
-    return blurredImg
+    blurred_img = 255.0 * blurred_img / blurred_img.max(initial=0)
+    return blurred_img
 
 
-
-def selectiveBlur(img, splits=2, cutoff=127, sigma=5):
-    print ""
-    print "Running Selective blur..."
+def selective_blur(img, splits=2, cutoff=127, sigma=5):
+    print("")
+    print("Running Selective blur...")
     interval = int(1.0 * 255 / splits)
-    rangesCeiling = [interval * x for x in range(1,splits)]
-    imgLayers = []
-    originalLayers = []
-    # for i, upperBound in enumerate(rangesCeiling):
-    #     newImg = midPass(img, upperBound-interval, upperBound)
-    #     originalLayers.append(newImg)
 
-    #     newImg = gaussianBlur(newImg, sigma=(5-i))
-    #     imgLayers.append(newImg)
-
-    # finalImg = np.zeros(img.shape)
-    # for image in imgLayers:
-    #     finalImg
-
-    truth1 = midPass(img, 0, cutoff-1)
-    truth2 = midPass(img, cutoff, 256)
+    truth1 = mid_pass(img, 0, cutoff - 1)
+    truth2 = mid_pass(img, cutoff, 256)
     img1 = np.array(img)
     img2 = np.array(img)
-    img1[truth1 == False] = 0
+    img1[not truth1] = 0
 
-    img1 = filterLines.linify(img1, separateColours=False, lineFactor=2, lean=1, allowLineMerging=False)
+    img1 = filterLines.linify(img1, separate_colours=False, line_factor=2, lean=1, allow_line_merging=False)
     img1 = filter1.affectOnLineContrast(img1, contrast=50, span=5, vertical=True, randomise=False, ifContrastLessThan=True)
-    img1 = gaussianBlur(img1, sigma=sigma)
+    img1 = gaussian_blur(img1, sigma=sigma)
 
-    
+    final_img = np.array(img1)
+    final_img[not truth1] = img2[not truth1]
 
-    finalImg = np.array(img1)
-    finalImg[truth1 == False] = img2[truth1 == False]
-
-
-
-    return finalImg
+    return final_img

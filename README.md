@@ -5,4 +5,4 @@ TODO:
 - add install details
 - more filters
 - reorganise each filter into its own file
-- allow for sudo machine learning preferred parameters
+- allow for pseudo-machine learning preferred parameters?

@@ -1,25 +1,27 @@
 import numpy as np
 
-def highPass(img, cutoff):
-  print "running highpass..."
-  img = midPass(img, cutoff, 256)
 
-  return img
+def high_pass(img, cutoff):
+    print("running highpass...")
+    img = mid_pass(img, cutoff, 256)
 
-def lowPass(img, cutoff):
-  print "running lowPass..."
-  img = midPass(img, 0, cutoff)
+    return img
 
-  return img
 
-def midPass(img, cutoffLower, cutoffHigher):
-  print "running midPass..."
+def low_pass(img, cutoff):
+    print("running lowPass...")
+    img = mid_pass(img, 0, cutoff)
 
-  magImg = np.zeros((img.shape[0], img.shape[1]))
-  magImg = (np.amax(img, axis=2)).astype(int)
+    return img
 
-  cut = np.ones(magImg.shape)
-  cut[magImg < cutoffLower] = 0
-  cut[magImg > cutoffHigher] = 0
 
-  return cut.astype(bool)
+def mid_pass(img, cutoff_lower, cutoff_higher):
+    print("running midPass...")
+
+    mag_img = (np.amax(img, axis=2)).astype(int)
+
+    cut = np.ones(mag_img.shape)
+    cut[mag_img < cutoff_lower] = 0
+    cut[mag_img > cutoff_higher] = 0
+
+    return cut.astype(bool)

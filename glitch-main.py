@@ -1,8 +1,7 @@
-
 import numpy as np
 import random
 from PIL import Image
-import sys
+import argparse
 
 import tools
 import filter1
@@ -11,92 +10,113 @@ import filterLines
 import filterBlur
 import filterCutoff
 import filterWave
-import filterPostProcessing
-
-fileName = 'sunset_colombia.jpg'
-Im = Image.open("source/%s" % (fileName))
-imageArray = np.array(Im)
-
-def gifGlitch(infile):
-    try:
-        im = Image.open(infile)
-    except IOError:
-        print "Can't load gif", infile
-        sys.exit(1)
-    i = 0
-    mypalette = im.getpalette()
-    gifImgs = []
-    try:
-        while i+1:
-            im.putpalette(mypalette)
-            new_im = Image.new("RGBA", im.size)
-            new_im.paste(im)
-            imArray = np.array(new_im)
-            imArray = imArray[:, :, :-1]
-            #imArray = filter1.increaseContrast(imArray, factor=1.8)
-            imArray = filterLines.linify(imArray, separateColours=False, lineFactor=4, lean=1, allowLineMerging=True)
-            imArray = filter1.affectOnLineContrast(imArray, contrast=150, span=8, vertical=True, randomise=True, ifContrastLessThan=False)
-            gifImgs.append(imArray)
-            i += 1
-            im.seek(im.tell() + 1)
-
-    except EOFError:
-        pass # end of sequence
-    tools.saveNewGif(gifImgs, fileName)
-
-def imgToGifGlitch(img, rangeMax):
-	imgList = []
-	for i in range(0, rangeMax):
-		print""
-		print "creating img %i" % i
-
-		vCutoff = int(255 - abs(255 - ((1.0*i/rangeMax)*510)))
-		vSigma = max(0.01, 10 - abs(10 - (1.0*20*i/rangeMax)))
-		
-		print "params: vCutoff %i, vSigma %i" % (vCutoff, vSigma)
-
-		newImageArray = filterBlur.selectiveBlur(imageArray, splits=2, cutoff=vCutoff, sigma=vSigma)
-		imgList.append(int(newImageArray+0.5))
-
-	tools.saveNewGif(imgList, fileName)
-
-#gifGlitch("source/%s.gif" % (fileName))
-#imgToGifGlitch(imageArray, 60)
 
 
-def imgToimg(imageArray):
-	colourMapping = {0:[186,0,0],
-				 1:[240,227,227],
-				 2:[37,163,70]}
+class Glitcher:
 
-	for i in range(0, 1):
-		print "creating img %i" % i
+    def __init__(self, filename: str):
+        self.filename = filename
+        self.img = Image.open(f"source/{filename}")
+        self.image_array = np.array(self.img)
 
-		rContrastFactor = 1 + random.random() + 1	
-		rLineFactor = int(random.random() * 16 + 0.5)
-		rLean = int(random.random()**2 * 4) * (-1)**(int(random.random()*2))
-		rSeparateColours = random.random() > 0.7
-		rAllowLineMerging = random.random() > 0.8
+    def gif_glitch(self):
+        img = self.img
+        i = 0
+        my_palette = img.getpalette()
+        gif_images = []
+        try:
+            while i+1:
+                img.putpalette(my_palette)
+                new_im = Image.new("RGBA", img.size)
+                new_im.paste(img)
+                image_array = np.array(new_im)
+                image_array = image_array[:, :, :-1]
+                # image_array = filter1.increaseContrast(image_array, factor=1.8)
+                image_array = filterLines.linify(image_array, separate_colours=False, line_factor=4, lean=1, allow_line_merging=True)
+                image_array = filter1.affectOnLineContrast(image_array, contrast=150, span=8, vertical=True, randomise=True, ifContrastLessThan=False)
+                gif_images.append(image_array)
+                i += 1
+                img.seek(img.tell() + 1)
 
-		rContrast = int(random.random() * 200)
-		rSpan = int(random.random() * 5)
-		rVertical = random.random() > 0.3
-		rRandomise = random.random() > 0.8
-		rIfContrastLessThan = random.random() > 0.7
+        except EOFError:
+            pass # end of sequence
+        tools.save_new_gif(gif_images, self.filename)
 
-		#imageArray = filterFourier.blur2D(imageArray, gaussianAccent=180)
-		imageArray = filterWave.wavifyConstantWave(imageArray, lineCount=100, overlap=2.8, constantWaveCount=16)
-		#imageArray = filterPostProcessing.antialiase(imageArray)
-		#imageArray = filterFourier.blur2D(imageArray, gaussianAccent=400, process="antialiase")
+    def img_to_gif_glitch(self, img, range_max):
+        img_list = []
+        for i in range(0, range_max):
+            print("")
+            print("creating img {}".format(i))
 
-		#imageArray = filterFourier.blur2D(imageArray, gaussianAccent=280)
-		#imageArray = filterWave.wavify(imageArray, lineCount=70, overlap=2.)
-		#imageArray = filter1.spreadPrimaryColours(imageArray, colourMapping)
+            v_cutoff = int(255 - abs(255 - ((1.0*i/range_max)*510)))
+            v_sigma = max(0.01, 10 - abs(10 - (1.0*20*i/range_max)))
 
-		#imageArray = filter1.affectOnLineContrast(imageArray, vertical=False, ifContrastLessThan=False)
-		#imageArray = filter1.mixup(imageArray)
-		imageArray = filterFourier.blur2D(imageArray, gaussianAccent=600, process="antialiase")
+            print("params: v_cutoff %i, v_sigma %i" % (v_cutoff, v_sigma))
 
-		tools.saveNewFile(imageArray, fileName)
+            new_image_array = filterBlur.selectiveBlur(self.image_array, splits=2, cutoff=v_cutoff, sigma=v_sigma)
+            img_list.append((new_image_array+0.5).astype(int))
 
-imgToimg(imageArray)
+        tools.save_new_gif(img_list, self.filename)
+
+    # gif_glitch("source/%s.gif" % (file_name))
+    # img_to_gif_glitch(image_array, 60)
+
+    def img_to_img(self):
+        image_array = np.array(self.image_array)
+
+        # remove any alpha channels, so image doesn't just come out transparent when saved again, since we apply effects
+        # on all channels in the same way
+        # TODO: figure out best way to deal with alpha channel
+        if len(image_array.shape) == 4:
+            image_array = image_array[:, :, 0:-1]
+
+        colour_mapping = [[186,   0,   0],
+                         [240, 227, 227],
+                         [37,  163, 70]]
+        for i in range(0, 40):
+            print("creating img {}".format(i))
+            image_array = np.array(self.image_array)
+
+            r_contrast_factor = 1 + random.random() + 1
+            r_line_factor = int(random.random() * 16 + 0.5)
+            r_lean = int(random.random()**2 * 4) * (-1)**(int(random.random()*2))
+            r_separate_colours = random.random() > 0.7
+            r_allow_line_merging = random.random() > 0.8
+            r_left = random.random() > 0.7
+            r_straight = random.random() > 0.8
+
+            r_contrast = int(random.random() * 200)
+            r_span = int(random.random() * 5)
+            r_vertical = random.random() > 0.3
+            r_randomise = random.random() > 0.8
+            r_if_contrast_less_than = random.random() > 0.7
+
+            r_thickness = int(2 + random.random() * 3)
+            r_line_count = int(20 + random.random() * 150)
+            r_overlap = int(random.random() * 4 + 3)
+            r_wave_vertical = random.random() > 0.5
+
+            image_array = filter1.mixup(image_array)
+            image_array = filterWave.wavify(image_array, lineCount=r_line_count, thickness=r_thickness,
+                                            overlap=r_overlap, vertical=r_wave_vertical)
+            image_array = filterFourier.blur_2d(image_array, gaussianAccent=200, process="antialiase")
+            image_array = filterLines.linify(image_array, r_separate_colours, r_line_factor, r_lean,
+                                             r_allow_line_merging, r_left, r_straight)
+            # image_array = filterWave.wavify(image_array, lineCount=r_lineCount, thickness=r_thickness,
+            #                                 overlap=r_overlap, vertical=r_waveVertical)
+            # image_array = filter1.spreadPrimaryColours(image_array, colour_mapping)
+
+            # image_array = filterFourier.blur2D(image_array, gaussianAccent=600, process="antialiase")
+
+            tools.save_new_file(image_array, self.filename)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Glitch some pics!')
+    parser.add_argument('filename', type=str, default=None, help='source image filename')
+    args = parser.parse_args()
+
+    g = Glitcher(args.filename)
+    g.img_to_img()
+
+# img_to_gif_glitch(image_array, 50)

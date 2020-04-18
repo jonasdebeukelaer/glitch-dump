@@ -2,65 +2,68 @@ from math import sqrt
 import tools
 import numpy as np
 
-def fourierEffect(img, steps):
-    fImg = np.fft.rfft2(img, axes=(0,1))
-    newFimg = fImg
+
+def fourier_effect(img, steps):
+    f_img = np.fft.rfft2(img, axes=(0, 1))
+    new_f_img = f_img
     
-    ymax = fImg.shape[0]
-    xmax = fImg.shape[1]
-    print ""
-    for y in range(0, ymax):
-        tools.displayPercentage("running Fourier stuff... ", y, ymax)
-        for x in range(0, xmax):
-            newFimg[y, x, 0] = fImg[y, x][0].real * sqrt(abs(x - (xmax/2))) + fImg[y, x][0].imag
-            newFimg[y, x, 1] = fImg[y, x][1].real * sqrt(abs(x - (xmax/2))) + fImg[y, x][1].imag
-            newFimg[y, x, 2] = fImg[y, x][2].real * sqrt(abs(x - (xmax/2))) + fImg[y, x][2].imag
+    y_max = f_img.shape[0]
+    x_max = f_img.shape[1]
+    print("")
+    for y in range(0, y_max):
+        tools.display_percentage("running Fourier stuff... ", y, y_max)
+        for x in range(0, x_max):
+            new_f_img[y, x, 0] = f_img[y, x][0].real * sqrt(abs(x - (x_max/2))) + f_img[y, x][0].imag
+            new_f_img[y, x, 1] = f_img[y, x][1].real * sqrt(abs(x - (x_max/2))) + f_img[y, x][1].imag
+            new_f_img[y, x, 2] = f_img[y, x][2].real * sqrt(abs(x - (x_max/2))) + f_img[y, x][2].imag
             for index, step in enumerate(steps):
-                if (x % step == 0):
-                   newFimg[y][x][index] = 0
+                if x % step == 0:
+                    new_f_img[y][x][index] = 0
 
-    newImg = np.real(np.fft.irfft2(newFimg, axes=(0,1)))
-    return newImg
+    new_img = np.real(np.fft.irfft2(new_f_img, axes=(0, 1)))
+    return new_img
 
-def blur2D(img, gaussianAccent=0.4, process="gaussian"):
+
+def blur_2d(img, gaussian_accent=0.4, process="gaussian"):
     if len(img.shape) == 2: 
-        return blur2DMonocrome(img, lineCount, sparseness, overlap)
+        return blur_2d_monochrome(img, gaussian_accent, process)
     else:
-        img0 = blur2DMonocrome(img[:, :, 0], gaussianAccent, process)
-        img1 = blur2DMonocrome(img[:, :, 1], gaussianAccent, process)
-        img2 = blur2DMonocrome(img[:, :, 2], gaussianAccent, process)
+        img0 = blur_2d_monochrome(img[:, :, 0], gaussian_accent, process)
+        img1 = blur_2d_monochrome(img[:, :, 1], gaussian_accent, process)
+        img2 = blur_2d_monochrome(img[:, :, 2], gaussian_accent, process)
         img = np.dstack([img0, img1, img2])
         return img
 
-def blur2DMonocrome(img, gaussianAccent, process):
-    print ""
-    img = tools.monocrome(img)
-    fImg = np.fft.rfft2(img, axes=(0,1))
 
-    kernel = createKernel(img.shape, gaussianAccent, process)
-    fKernel = np.fft.rfft2(kernel, axes=(0,1))
+def blur_2d_monochrome(img, gaussian_accent, process):
+    print("")
+    img = tools.monochrome(img)
+    f_img = np.fft.rfft2(img, axes=(0, 1))
 
-    newFImg = (fKernel * fImg)
+    kernel = create_kernel(img.shape, gaussian_accent, process)
+    f_kernel = np.fft.rfft2(kernel, axes=(0, 1))
 
-    newImg = np.real(np.fft.irfft2(newFImg, axes=(0,1)))
-    return np.fft.ifftshift(newImg)
+    new_f_img = (f_kernel * f_img)
 
-def createKernel(imgShape, gaussianAccent, process):
-    x_ = int(imgShape[0]/2+1)
-    y_ = int(imgShape[1]/2+1)
-    kernel = np.zeros((imgShape))
+    new_img = np.real(np.fft.irfft2(new_f_img, axes=(0, 1)))
+    return np.fft.ifftshift(new_img)
+
+
+def create_kernel(img_shape, gaussian_accent, process):
+    x_ = int(img_shape[0]/2+1)
+    y_ = int(img_shape[1]/2+1)
+    kernel = np.zeros(img_shape)
 
     for xIndex, x in enumerate(kernel):
-        tools.displayPercentage("running %s blur... " % (process), xIndex, imgShape[0])
+        tools.display_percentage("running %s blur... " % process, xIndex, img_shape[0])
         for yIndex, y in enumerate(x):
 
-            kernel[xIndex, yIndex] = gaussian2D(xIndex, yIndex, x_, y_, gaussianAccent)
+            kernel[xIndex, yIndex] = gaussian_2d(xIndex, yIndex, x_, y_, gaussian_accent)
 
     return kernel
 
-def gaussian2D(x, y, x_, y_, accent):
-    squareX = (1.*(x-x_)/x_)**2
-    squareY = (1.*(y-y_)/y_)**2
-    return np.exp(-accent * (squareX + squareY)**(0.5))
 
-
+def gaussian_2d(x, y, x_, y_, accent):
+    square_x = (1.*(x-x_)/x_)**2
+    square_y = (1.*(y-y_)/y_)**2
+    return np.exp(-accent * (square_x + square_y)**0.5)

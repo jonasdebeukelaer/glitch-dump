@@ -2,5 +2,9 @@
 *.png
 *.bmp
 pic_archive/
+source/
 .DS_Store
 *.pyc
+glitch-dump.iml
+**/*.xml
+.idea/
