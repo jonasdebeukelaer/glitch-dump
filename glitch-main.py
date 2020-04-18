@@ -33,16 +33,16 @@ class Glitcher:
                 image_array = image_array[:, :, :-1]
                 # image_array = filter1.increaseContrast(image_array, factor=1.8)
                 image_array = filterLines.linify(image_array, separate_colours=False, line_factor=4, lean=1, allow_line_merging=True)
-                image_array = filter1.affectOnLineContrast(image_array, contrast=150, span=8, vertical=True, randomise=True, ifContrastLessThan=False)
+                image_array = filter1.affect_on_line_contrast(image_array, contrast=150, span=8, vertical=True, randomise=True, less_than=False)
                 gif_images.append(image_array)
                 i += 1
                 img.seek(img.tell() + 1)
 
         except EOFError:
-            pass # end of sequence
+            pass  # end of sequence
         tools.save_new_gif(gif_images, self.filename)
 
-    def img_to_gif_glitch(self, img, range_max):
+    def img_to_gif_glitch(self, range_max):
         img_list = []
         for i in range(0, range_max):
             print("")
@@ -53,7 +53,7 @@ class Glitcher:
 
             print("params: v_cutoff %i, v_sigma %i" % (v_cutoff, v_sigma))
 
-            new_image_array = filterBlur.selectiveBlur(self.image_array, splits=2, cutoff=v_cutoff, sigma=v_sigma)
+            new_image_array = filterBlur.selective_blur(self.image_array, splits=2, cutoff=v_cutoff, sigma=v_sigma)
             img_list.append((new_image_array+0.5).astype(int))
 
         tools.save_new_gif(img_list, self.filename)
@@ -97,9 +97,9 @@ class Glitcher:
             r_wave_vertical = random.random() > 0.5
 
             image_array = filter1.mixup(image_array)
-            image_array = filterWave.wavify(image_array, lineCount=r_line_count, thickness=r_thickness,
+            image_array = filterWave.wavify(image_array, line_count=r_line_count, thickness=r_thickness,
                                             overlap=r_overlap, vertical=r_wave_vertical)
-            image_array = filterFourier.blur_2d(image_array, gaussianAccent=200, process="antialiase")
+            image_array = filterFourier.blur_2d(image_array, gaussian_accent=200, process="antialiase")
             image_array = filterLines.linify(image_array, r_separate_colours, r_line_factor, r_lean,
                                              r_allow_line_merging, r_left, r_straight)
             # image_array = filterWave.wavify(image_array, lineCount=r_lineCount, thickness=r_thickness,
