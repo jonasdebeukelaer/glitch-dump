@@ -1,6 +1,6 @@
 import numpy as np
 from math import sin, pi
-from tools import wrap, display_percentage
+from internal.tools import wrap, display_percentage
 
 
 def wavify_constant_wave(img, line_count, thickness=1, overlap=0, constant_wave_count=10):

@@ -1,6 +1,6 @@
 import numpy as np
-from tools import display_percentage
-from tools import wrap
+from internal.tools import display_percentage
+from internal.tools import wrap
 
 
 def linify(img, separate_colours=False, line_factor=4, lean=0, allow_line_merging=False, left_only=False, straight_only=False):

@@ -1,5 +1,5 @@
 from math import sqrt
-import tools
+from internal import tools
 import numpy as np
 
 

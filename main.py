@@ -3,13 +3,8 @@ import random
 from PIL import Image
 import argparse
 
-import tools
-import filter1
-import filterFourier
-import filterLines
-import filterBlur
-import filterCutoff
-import filterWave
+from internal import tools
+from internal.filters import line_contrast, lines, blur, waves, spread
 
 
 class Glitcher:
@@ -31,9 +26,9 @@ class Glitcher:
                 new_im.paste(img)
                 image_array = np.array(new_im)
                 image_array = image_array[:, :, :-1]
-                # image_array = filter1.increaseContrast(image_array, factor=1.8)
-                image_array = filterLines.linify(image_array, separate_colours=False, line_factor=4, lean=1, allow_line_merging=True)
-                image_array = filter1.affect_on_line_contrast(image_array, contrast=150, span=8, vertical=True, randomise=True, less_than=False)
+                # image_array = contrast.increaseContrast(image_array, factor=1.8)
+                image_array = lines.linify(image_array, separate_colours=False, line_factor=4, lean=1, allow_line_merging=True)
+                image_array = line_contrast.affect_on_line_contrast(image_array, contrast=150, span=8, vertical=True, randomise=True, less_than=False)
                 gif_images.append(image_array)
                 i += 1
                 img.seek(img.tell() + 1)
@@ -53,7 +48,7 @@ class Glitcher:
 
             print("params: v_cutoff %i, v_sigma %i" % (v_cutoff, v_sigma))
 
-            new_image_array = filterBlur.selective_blur(self.image_array, splits=2, cutoff=v_cutoff, sigma=v_sigma)
+            new_image_array = blur.selective_blur(self.image_array, splits=2, cutoff=v_cutoff, sigma=v_sigma)
             img_list.append((new_image_array+0.5).astype(int))
 
         tools.save_new_gif(img_list, self.filename)
@@ -96,17 +91,14 @@ class Glitcher:
             r_overlap = int(random.random() * 4 + 3)
             r_wave_vertical = random.random() > 0.5
 
-            image_array = filter1.mixup(image_array)
-            image_array = filterWave.wavify(image_array, line_count=r_line_count, thickness=r_thickness,
-                                            overlap=r_overlap, vertical=r_wave_vertical)
-            image_array = filterFourier.blur_2d(image_array, gaussian_accent=200, process="antialiase")
-            image_array = filterLines.linify(image_array, r_separate_colours, r_line_factor, r_lean,
-                                             r_allow_line_merging, r_left, r_straight)
-            # image_array = filterWave.wavify(image_array, lineCount=r_lineCount, thickness=r_thickness,
-            #                                 overlap=r_overlap, vertical=r_waveVertical)
-            # image_array = filter1.spreadPrimaryColours(image_array, colour_mapping)
+            # image_array = line_contrast.affect_on_line_contrast(image_array, contrast=150, span=8, vertical=True, randomise=True, less_than=False)
+            # image_array = mixup.mixup(image_array)
+            image_array = waves.wavify(image_array, line_count=r_line_count, thickness=r_thickness, overlap=r_overlap, vertical=r_wave_vertical)
+            # image_array = fourier.blur_2d(image_array, gaussian_accent=200, process="antialiase")
+            # image_array = lines.linify(image_array, r_separate_colours, r_line_factor, r_lean, r_allow_line_merging, r_left, r_straight)
+            image_array = spread.spread_primary_colours(image_array, colour_mapping)
 
-            # image_array = filterFourier.blur2D(image_array, gaussianAccent=600, process="antialiase")
+            # image_array = Fourier.blur2D(image_array, gaussianAccent=600, process="antialiase")
 
             tools.save_new_file(image_array, self.filename)
 

@@ -1,7 +1,7 @@
 import numpy as np
 import random
-import tools
-from tools import wrap
+from internal import tools
+from internal.tools import wrap
 
 
 def affect_on_line_contrast(img, contrast=10, span=10, vertical=False, randomise=False, less_than=True):
@@ -53,41 +53,3 @@ def get_rand_colour_from_y_span(img, rand_y, x, y_max, colour_number):
     return int(img[min(rand_y, y_max-1), x, colour_number])
 
 
-def mixup(img):
-    weight = 0.4
-    cutoff = 100
-    y_max = img.shape[0]
-    x_max = img.shape[1]
-    new_img = img
-    for y in range(0, y_max):
-        tools.display_percentage("running mixup... ", y, y_max)
-        for x in range(0, x_max):
-            if img[y, x, 2] < cutoff and img[y, x, 1] < cutoff:
-                new_x = int(((x + img[y, x, 2]) * 2) % x_max)
-
-                new_img[y, new_x][:] = ((1.0 - weight) * img[y, x][:] + weight * img[y, new_x][:])
-                new_img[y, x][:] = (weight * img[y, x][:] + (1.0 - weight) * img[y, new_x][:])
-
-    return new_img
-
-
-def increase_contrast(img, factor=2):
-    print("")
-    new_img = (img - np.mean(img))**factor
-
-    return new_img
-
-
-def spread_primary_colours(img, mapping):
-    print("")
-    mapping_array = np.array(mapping, dtype='float32')
-    for x in range(0, 3):
-        mapping_array[x] = np.array(mapping_array[x]) * 1. / np.sum(mapping_array[x])
-
-    for i, row in enumerate(img):
-        tools.display_percentage("running spread_primary_colours... ", i, img.shape[0])
-
-        for j, element in enumerate(row):
-            img[i, j] = mapping_array.dot(img[i, j])
-
-    return np.array(img) * 255. / np.sum(img)

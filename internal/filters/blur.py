@@ -1,9 +1,8 @@
 import math
 import numpy as np
 
-from filterCutoff import mid_pass
-import filterLines
-import filter1
+from internal.filters.cutoff import mid_pass
+from internal.filters import line_contrast, lines
 
 
 def gaussian_blur(img, sigma=5):
@@ -49,8 +48,8 @@ def selective_blur(img, splits=2, cutoff=127, sigma=5):
     img2 = np.array(img)
     img1[not truth1] = 0
 
-    img1 = filterLines.linify(img1, separate_colours=False, line_factor=2, lean=1, allow_line_merging=False)
-    img1 = filter1.affectOnLineContrast(img1, contrast=50, span=5, vertical=True, randomise=False, ifContrastLessThan=True)
+    img1 = lines.linify(img1, separate_colours=False, line_factor=2, lean=1, allow_line_merging=False)
+    img1 = line_contrast.affectOnLineContrast(img1, contrast=50, span=5, vertical=True, randomise=False, ifContrastLessThan=True)
     img1 = gaussian_blur(img1, sigma=sigma)
 
     final_img = np.array(img1)

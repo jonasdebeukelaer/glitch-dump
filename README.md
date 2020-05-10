@@ -1,8 +1,18 @@
-# glitch-dump
-Custom collection of image glitch tools in Python.
+# GLITCH-DUMP
+Collection of image warping tools in Python 3.
 
-TODO:
-- add install details
+## Installation
+```bash
+pip install -r requirements.txt
+```
+
+## Run
+Edit what filters get run in main, then:
+```bash
+python main.py source-image-filepath
+```
+
+## TODO
+- 
 - more filters
-- reorganise each filter into its own file
 - allow for pseudo-machine learning preferred parameters?
