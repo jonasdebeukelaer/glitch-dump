@@ -2,9 +2,12 @@ import numpy as np
 from internal import tools
 
 
-def spread_primary_colours(img, mapping):
-    print("")
-    mapping_array = np.array(mapping, dtype='float32')
+def rand_spread_colours(img: np.array) -> np.array:
+    rand_mapping = np.random.rand(3, 3) * 200 + 40
+    return spread_primary_colours(img, rand_mapping)
+
+
+def spread_primary_colours(img: np.array, mapping_array: np.array) -> np.array:
     for x in range(0, 3):
         mapping_array[x] = np.array(mapping_array[x]) * 1. / np.sum(mapping_array[x])
 
@@ -14,4 +17,4 @@ def spread_primary_colours(img, mapping):
         for j, element in enumerate(row):
             img[i, j] = mapping_array.dot(img[i, j])
 
-    return np.array(img) * 255. / np.sum(img)
+    return np.array(img) * 255. / np.max(img)

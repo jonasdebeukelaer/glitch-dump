@@ -17,12 +17,13 @@ def monochrome(img):
 
 # wrap pixels around edges of the image
 def wrap(max_position: int, position: int):
-    if position > max_position:
-        return position - max_position
-    elif position < 0:
-        return max_position + position
-    else:
-        return position
+    while position >= max_position:
+        position = position - max_position
+
+    while position < 0:
+        position = position + max_position
+
+    return position
 
 
 def display_percentage(msg: str, i: int, total: int):
@@ -50,7 +51,7 @@ def save_new_gif(gif_images, file_name: str):
     print("")
     print("renormalise and save...")
     file_name = "%s_%s" % (file_name, time.strftime("%y-%m-%d %H_%M_%S"))
-    gif_images = [255. * image_array / image_array.max() for image_array in gif_images]
+    # gif_images = [255. * image_array / image_array.max() for image_array in gif_images]
 
     imageio.mimsave(f"pic_archive/{file_name}.gif", gif_images, fps=24)
 

@@ -1,3 +1,4 @@
+import random
 from math import sqrt
 from internal import tools
 import numpy as np
@@ -24,15 +25,20 @@ def fourier_effect(img, steps):
     return new_img
 
 
-def blur_2d(img, gaussian_accent=0.4, process="gaussian"):
+def rand_blur_2d(img: np.array) -> np.array:
+    r_blur_accent = int(150 * random.random() + 50)
+    return blur_2d(img, r_blur_accent, process="gaussian")
+
+
+def blur_2d(img: np.array, gaussian_accent=0.4, process="gaussian") -> np.array:
     if len(img.shape) == 2: 
         return blur_2d_monochrome(img, gaussian_accent, process)
     else:
         img0 = blur_2d_monochrome(img[:, :, 0], gaussian_accent, process)
         img1 = blur_2d_monochrome(img[:, :, 1], gaussian_accent, process)
         img2 = blur_2d_monochrome(img[:, :, 2], gaussian_accent, process)
-        img = np.dstack([img0, img1, img2])
-        return img
+        new_img = np.dstack([img0, img1, img2])
+        return new_img
 
 
 def blur_2d_monochrome(img, gaussian_accent, process):

@@ -6,7 +6,6 @@ from internal.filters import line_contrast, lines
 
 
 def gaussian_blur(img, sigma=5):
-    print("")
     print("Running Gaussian blur...")
     f_img_red = np.fft.rfft2(img[:, :, 0], axes=(0, 1))
     f_img_blue = np.fft.rfft2(img[:, :, 1], axes=(0, 1))
@@ -38,7 +37,6 @@ def gaussian_blur(img, sigma=5):
 
 
 def selective_blur(img, splits=2, cutoff=127, sigma=5):
-    print("")
     print("Running Selective blur...")
     interval = int(1.0 * 255 / splits)
 

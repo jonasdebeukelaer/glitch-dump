@@ -4,17 +4,29 @@ from PIL import Image
 import argparse
 
 from internal import tools
-from internal.filters import line_contrast, lines, blur, waves, spread
+from internal.filters import contrast, cutoff, fourier, line_contrast, lines, mixup, spread, waves
 
 
 class Glitcher:
-
-    def __init__(self, filename: str):
+    def __init__(self, filename: str, iterations: int, effects: list):
         self.filename = filename
         self.img = Image.open(f"source/{filename}")
         self.image_array = np.array(self.img)
+        self.iterations = iterations
+        self.effects = effects
 
-    def gif_glitch(self):
+    rand_effect_map = {
+        'fourier': fourier.rand_blur_2d,
+        'line_contrast': line_contrast.rand_affect_on_line_contrast,
+        'lines': lines.rand_linify,
+        'mixup': mixup.rand_mixup,
+        'spread': spread.rand_spread_colours,
+        'waves_linear': waves.rand_wavify_lin,
+        'waves_circle': waves.rand_wavify_circle
+    }
+
+    # needs fixing
+    def gif_to_gif(self):
         img = self.img
         i = 0
         my_palette = img.getpalette()
@@ -26,9 +38,7 @@ class Glitcher:
                 new_im.paste(img)
                 image_array = np.array(new_im)
                 image_array = image_array[:, :, :-1]
-                # image_array = contrast.increaseContrast(image_array, factor=1.8)
-                image_array = lines.linify(image_array, separate_colours=False, line_factor=4, lean=1, allow_line_merging=True)
-                image_array = line_contrast.affect_on_line_contrast(image_array, contrast=150, span=8, vertical=True, randomise=True, less_than=False)
+                image_array = self.apply_effects(image_array)
                 gif_images.append(image_array)
                 i += 1
                 img.seek(img.tell() + 1)
@@ -37,24 +47,16 @@ class Glitcher:
             pass  # end of sequence
         tools.save_new_gif(gif_images, self.filename)
 
-    def img_to_gif_glitch(self, range_max):
+    def img_to_gif(self, range_max):
         img_list = []
         for i in range(0, range_max):
-            print("")
+            print("\n")
             print("creating img {}".format(i))
 
-            v_cutoff = int(255 - abs(255 - ((1.0*i/range_max)*510)))
-            v_sigma = max(0.01, 10 - abs(10 - (1.0*20*i/range_max)))
-
-            print("params: v_cutoff %i, v_sigma %i" % (v_cutoff, v_sigma))
-
-            new_image_array = blur.selective_blur(self.image_array, splits=2, cutoff=v_cutoff, sigma=v_sigma)
-            img_list.append((new_image_array+0.5).astype(int))
+            new_image_array = self.apply_effects(self.image_array)
+            img_list.append((new_image_array+0.5).astype(np.uint8))
 
         tools.save_new_gif(img_list, self.filename)
-
-    # gif_glitch("source/%s.gif" % (file_name))
-    # img_to_gif_glitch(image_array, 60)
 
     def img_to_img(self):
         image_array = np.array(self.image_array)
@@ -65,50 +67,45 @@ class Glitcher:
         if len(image_array.shape) == 4:
             image_array = image_array[:, :, 0:-1]
 
-        colour_mapping = [[186,   0,   0],
-                         [240, 227, 227],
-                         [37,  163, 70]]
-        for i in range(0, 40):
+        for i in range(0, self.iterations):
+            print("\n-----------------------")
             print("creating img {}".format(i))
-            image_array = np.array(self.image_array)
+            new_img = self.apply_effects(image_array)
+            tools.save_new_file(new_img, self.filename + "_" + str(i))
 
-            r_contrast_factor = 1 + random.random() + 1
-            r_line_factor = int(random.random() * 16 + 0.5)
-            r_lean = int(random.random()**2 * 4) * (-1)**(int(random.random()*2))
-            r_separate_colours = random.random() > 0.7
-            r_allow_line_merging = random.random() > 0.8
-            r_left = random.random() > 0.7
-            r_straight = random.random() > 0.8
+    def apply_effects(self, img: np.array) -> np.array:
+        image_array = np.array(img)
 
-            r_contrast = int(random.random() * 200)
-            r_span = int(random.random() * 5)
-            r_vertical = random.random() > 0.3
-            r_randomise = random.random() > 0.8
-            r_if_contrast_less_than = random.random() > 0.7
+        for effect in self.effects:
+            print("")
+            if effect not in self.rand_effect_map:
+                print(f"\nWARNING: effect {effect} not found, skipping")
+                continue
 
-            r_thickness = int(2 + random.random() * 3)
-            r_line_count = int(20 + random.random() * 150)
-            r_overlap = int(random.random() * 4 + 3)
-            r_wave_vertical = random.random() > 0.5
+            image_array = self.rand_effect_map[effect](image_array)
 
-            # image_array = line_contrast.affect_on_line_contrast(image_array, contrast=150, span=8, vertical=True, randomise=True, less_than=False)
-            # image_array = mixup.mixup(image_array)
-            image_array = waves.wavify(image_array, line_count=r_line_count, thickness=r_thickness, overlap=r_overlap, vertical=r_wave_vertical)
-            # image_array = fourier.blur_2d(image_array, gaussian_accent=200, process="antialiase")
-            # image_array = lines.linify(image_array, r_separate_colours, r_line_factor, r_lean, r_allow_line_merging, r_left, r_straight)
-            image_array = spread.spread_primary_colours(image_array, colour_mapping)
-
-            # image_array = Fourier.blur2D(image_array, gaussianAccent=600, process="antialiase")
-
-            tools.save_new_file(image_array, self.filename)
+        return image_array
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Glitch some pics!')
+    parser = argparse.ArgumentParser(description='Glitch some images, using randomised parameters!')
     parser.add_argument('filename', type=str, default=None, help='source image filename')
+    parser.add_argument('-m', '--media', type=str, default='img', help='media to output. can be [img, img_gif, gif]')
+    parser.add_argument('-gf', '--gif_frames', type=int, default=10, help='gif frames to generate')
+    parser.add_argument('-e', '--effects', nargs='+', type=str,
+                        help=f'effects to apply. available options: [{list(Glitcher.rand_effect_map.keys())}]')
+    parser.add_argument('-i', '--iterations', type=int, default=1, help='number of outputs to create')
     args = parser.parse_args()
 
-    g = Glitcher(args.filename)
-    g.img_to_img()
 
-# img_to_gif_glitch(image_array, 50)
+    g = Glitcher(args.filename, args.iterations, args.effects)
+
+    if args.media == 'img':
+        g.img_to_img()
+    elif args.media == 'img_gif':
+        g.img_to_gif(args.gif_frames)
+    elif args.media == 'gif':
+        g.gif_to_gif()
+    else:
+        raise ValueError('unrecognised media type')
+

@@ -1,13 +1,24 @@
 import numpy as np
+import random
 from internal.tools import display_percentage
 from internal.tools import wrap
+
+
+def rand_linify(img: np.array) -> np.array:
+    r_line_factor = int(random.random() * 16 + 0.5)
+    r_lean = int(random.random()**2 * 4) * (-1)**(int(random.random()*2))
+    r_separate_colours = random.random() > 0.7
+    r_allow_line_merging = random.random() > 0.8
+    r_left = random.random() > 0.7
+    r_straight = random.random() > 0.8
+
+    return linify(img, r_separate_colours, r_line_factor, r_lean, r_allow_line_merging, r_left, r_straight)
 
 
 def linify(img, separate_colours=False, line_factor=4, lean=0, allow_line_merging=False, left_only=False, straight_only=False):
     if line_factor == 0:
         line_factor = 1
 
-    print("")
     args = locals()
     del args["img"]
     print("args: ", args)

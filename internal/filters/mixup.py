@@ -1,9 +1,15 @@
 from internal import tools
+import numpy as np
+import random
 
 
-def mixup(img):
-    weight = 0.4
-    cutoff = 100
+def rand_mixup(img) -> np.array:
+    r_weight = random.random()
+    r_cutoff = 40 + random.random() * 200
+    return mixup(img, r_weight, r_cutoff)
+
+
+def mixup(img: np.array, weight: float, cutoff: int) -> np.array:
     y_max = img.shape[0]
     x_max = img.shape[1]
     new_img = img

@@ -4,13 +4,23 @@ from internal import tools
 from internal.tools import wrap
 
 
+def rand_affect_on_line_contrast(img: np.array) -> np.array:
+    r_contrast = int(random.random() * 50)
+    r_span = int(random.random() * 20)
+    r_vertical = random.random() > 0.3
+    r_randomise = random.random() > 0.8
+    r_if_contrast_less_than = random.random() > 0.7
+
+    return affect_on_line_contrast(img, r_contrast, r_span, r_vertical, r_randomise, r_if_contrast_less_than)
+
+
 def affect_on_line_contrast(img, contrast=10, span=10, vertical=False, randomise=False, less_than=True):
     if vertical:
         img = np.swapaxes(img, 0, 1)
     new_img = np.asarray(img[:])
     y_max = img.shape[0]-1
     x_max = img.shape[1]-1
-    print("")
+
     for y in range(0, y_max):
         tools.display_percentage("running outlines... ", y, y_max)
         for x in range(span, x_max-span):
