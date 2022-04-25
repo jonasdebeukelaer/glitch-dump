@@ -25,7 +25,7 @@ def misalign(
     print("args: ", args)
 
     if not horizontal:
-        np.swapaxes(img, 0, 1)
+        img = np.swapaxes(img, 0, 1)
 
     remainder = img.shape[0] % segments
 
@@ -44,4 +44,6 @@ def misalign(
 
     collected_segments = np.concatenate(img_segments, axis=0)
 
-    return collected_segments if horizontal else np.swapaxes(collected_segments, 1, 0)
+    return (
+        collected_segments if not horizontal else np.swapaxes(collected_segments, 0, 1)
+    )
