@@ -12,7 +12,7 @@ def monochrome(img):
         img = np.sum(img, axis=2).astype(np.float)
     else:
         img = img.astype(np.float)
-    return img * 255. / np.max(img)
+    return img * 255.0 / np.max(img)
 
 
 # wrap pixels around edges of the image
@@ -27,7 +27,7 @@ def wrap(max_position: int, position: int):
 
 
 def display_percentage(msg: str, i: int, total: int):
-    progress = i / (1. * total)
+    progress = i / (1.0 * total)
     bar_length = 20  # Modify this to change the length of the progress bar
     status = ""
     if isinstance(progress, int):
@@ -41,8 +41,10 @@ def display_percentage(msg: str, i: int, total: int):
     if progress >= 1:
         progress = 1
         status = "Done...\r\n"
-    block = int(round(bar_length*progress))
-    text = msg + "\r[{0}] {1}% {2}".format("="*block + " "*(bar_length-block), int(progress*100), status)
+    block = int(round(bar_length * progress))
+    text = msg + "\r[{0}] {1}% {2}".format(
+        "=" * block + " " * (bar_length - block), int(progress * 100), status
+    )
     sys.stdout.write(text)
     sys.stdout.flush()
 
@@ -59,9 +61,9 @@ def save_new_gif(gif_images, file_name: str):
 def save_new_file(image_array, file_name: str):
     print("")
     print("renormalise and save...")
-    image_array = 255. * image_array / image_array.max()
+    image_array = 255.0 * image_array / image_array.max()
 
     file_name = "%s_%s" % (file_name, time.strftime("%y-%m-%d, %H:%M:%S"))
 
-    file = Image.fromarray(image_array.astype('uint8'))
+    file = Image.fromarray(image_array.astype("uint8"))
     file.save(f"pic_archive/{file_name}.png")

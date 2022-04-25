@@ -4,9 +4,10 @@ import unittest
 
 
 class TestStringMethods(unittest.TestCase):
-
     def test_on_concentric_circle_centre(self):
-        self.assertTrue(on_concentric_circle(20, 20, 20, 20, 10, 1), "result fails at centre")
+        self.assertTrue(
+            on_concentric_circle(20, 20, 20, 20, 10, 1), "result fails at centre"
+        )
 
     def test_on_concentric_circle_symmetrical(self):
         a = [on_concentric_circle(x, 10, 20, 20, 10, 1) for x in range(1, 21)]
@@ -27,5 +28,5 @@ class TestStringMethods(unittest.TestCase):
         self.assertTrue(on_concentric_circle(1, 19, 91, 53, 11, 100))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

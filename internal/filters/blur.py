@@ -16,8 +16,13 @@ def gaussian_blur(img, sigma=5):
     mu_y = int((g_shape[1]) / 2)
 
     gaussian = [
-        [(1.0 / (2 * math.pi * sigma ** 2)) * math.exp((-1.0) * ((i - mu_y) ** 2 + (j - mu_x) ** 2) / (2 * sigma ** 2))
-         for i in range(g_shape[1])] for j in range(g_shape[0])]
+        [
+            (1.0 / (2 * math.pi * sigma ** 2))
+            * math.exp((-1.0) * ((i - mu_y) ** 2 + (j - mu_x) ** 2) / (2 * sigma ** 2))
+            for i in range(g_shape[1])
+        ]
+        for j in range(g_shape[0])
+    ]
     gaussian = np.array(gaussian)
     f_gaussian = np.fft.rfft2(gaussian, axes=(0, 1))
 
@@ -46,8 +51,17 @@ def selective_blur(img, splits=2, cutoff=127, sigma=5):
     img2 = np.array(img)
     img1[not truth1] = 0
 
-    img1 = lines.linify(img1, separate_colours=False, line_factor=2, lean=1, allow_line_merging=False)
-    img1 = line_contrast.affectOnLineContrast(img1, contrast=50, span=5, vertical=True, randomise=False, ifContrastLessThan=True)
+    img1 = lines.linify(
+        img1, separate_colours=False, line_factor=2, lean=1, allow_line_merging=False
+    )
+    img1 = line_contrast.affectOnLineContrast(
+        img1,
+        contrast=50,
+        span=5,
+        vertical=True,
+        randomise=False,
+        ifContrastLessThan=True,
+    )
     img1 = gaussian_blur(img1, sigma=sigma)
 
     final_img = np.array(img1)

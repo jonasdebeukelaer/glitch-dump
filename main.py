@@ -1,28 +1,40 @@
-import numpy as np
-import random
-from PIL import Image
+import os
 import argparse
 
+import numpy as np
+from PIL import Image
+
 from internal import tools
-from internal.filters import contrast, cutoff, fourier, line_contrast, lines, mixup, spread, waves
+from internal.filters import (
+    contrast,
+    cutoff,
+    fourier,
+    line_contrast,
+    lines,
+    mixup,
+    spread,
+    waves,
+    misalign,
+)
 
 
 class Glitcher:
-    def __init__(self, filename: str, iterations: int, effects: list):
-        self.filename = filename
-        self.img = Image.open(f"source/{filename}")
+    def __init__(self, source_file_path: str, iterations: int, effects: list):
+        _, self.filename = os.path.split(source_file_path)
+        self.img = Image.open(source_file_path)
         self.image_array = np.array(self.img)
         self.iterations = iterations
         self.effects = effects
 
     rand_effect_map = {
-        'fourier': fourier.rand_blur_2d,
-        'line_contrast': line_contrast.rand_affect_on_line_contrast,
-        'lines': lines.rand_linify,
-        'mixup': mixup.rand_mixup,
-        'spread': spread.rand_spread_colours,
-        'waves_linear': waves.rand_wavify_lin,
-        'waves_circle': waves.rand_wavify_circle
+        "fourier": fourier.rand_blur_2d,
+        "line_contrast": line_contrast.rand_affect_on_line_contrast,
+        "lines": lines.rand_linify,
+        "mixup": mixup.rand_mixup,
+        "spread": spread.rand_spread_colours,
+        "waves_linear": waves.rand_wavify_lin,
+        "waves_circle": waves.rand_wavify_circle,
+        "misalign": misalign.rand_misalign,
     }
 
     # needs fixing
@@ -32,7 +44,7 @@ class Glitcher:
         my_palette = img.getpalette()
         gif_images = []
         try:
-            while i+1:
+            while i + 1:
                 img.putpalette(my_palette)
                 new_im = Image.new("RGBA", img.size)
                 new_im.paste(img)
@@ -54,7 +66,7 @@ class Glitcher:
             print("creating img {}".format(i))
 
             new_image_array = self.apply_effects(self.image_array)
-            img_list.append((new_image_array+0.5).astype(np.uint8))
+            img_list.append((new_image_array + 0.5).astype(np.uint8))
 
         tools.save_new_gif(img_list, self.filename)
 
@@ -87,25 +99,44 @@ class Glitcher:
         return image_array
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Glitch some images, using randomised parameters!')
-    parser.add_argument('filename', type=str, default=None, help='source image filename')
-    parser.add_argument('-m', '--media', type=str, default='img', help='media to output. can be [img, img_gif, gif]')
-    parser.add_argument('-gf', '--gif_frames', type=int, default=10, help='gif frames to generate')
-    parser.add_argument('-e', '--effects', nargs='+', type=str,
-                        help=f'effects to apply. available options: [{list(Glitcher.rand_effect_map.keys())}]')
-    parser.add_argument('-i', '--iterations', type=int, default=1, help='number of outputs to create')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Glitch some images, using randomised parameters!"
+    )
+    parser.add_argument("filepath", type=str, default=None, help="source image path")
+    parser.add_argument(
+        "-m",
+        "--media",
+        type=str,
+        default="img",
+        help="media to output. can be [img, img_gif, gif]",
+    )
+    parser.add_argument(
+        "-gf",
+        "--gif_frames",
+        type=int,
+        default=10,
+        help="count of gif frames to generate",
+    )
+    parser.add_argument(
+        "-e",
+        "--effects",
+        nargs="+",
+        type=str,
+        help=f"effects to apply. available options: [{list(Glitcher.rand_effect_map.keys())}]",
+    )
+    parser.add_argument(
+        "-i", "--iterations", type=int, default=1, help="number of outputs to create"
+    )
     args = parser.parse_args()
 
+    g = Glitcher(args.filepath, args.iterations, args.effects)
 
-    g = Glitcher(args.filename, args.iterations, args.effects)
-
-    if args.media == 'img':
+    if args.media == "img":
         g.img_to_img()
-    elif args.media == 'img_gif':
+    elif args.media == "img_gif":
         g.img_to_gif(args.gif_frames)
-    elif args.media == 'gif':
+    elif args.media == "gif":
         g.gif_to_gif()
     else:
-        raise ValueError('unrecognised media type')
-
+        raise ValueError("unrecognised media type")
